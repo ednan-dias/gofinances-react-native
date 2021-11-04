@@ -29,6 +29,7 @@ export default function HighlightCard({
   lastTransaction,
   type,
 }: Props) {
+  console.log(amount);
   return (
     <Container type={type}>
       <Header>
@@ -38,7 +39,9 @@ export default function HighlightCard({
 
       <Footer>
         <Amount type={type}>{amount}</Amount>
-        <LastTransaction type={type}>{lastTransaction}</LastTransaction>
+        {amount !== "R$0,00" ? (
+          <LastTransaction type={type}>{lastTransaction}</LastTransaction>
+        ) : null}
       </Footer>
     </Container>
   );

@@ -124,6 +124,8 @@ export function Dashboard() {
 
     const total = entriesTotal - expensiveTotal;
 
+    console.log(lastTransactionEntries);
+
     setHighlightData({
       entries: {
         amount: entriesTotal.toLocaleString("pt-BR", {
@@ -151,10 +153,6 @@ export function Dashboard() {
     setIsLoading(false);
     // AsyncStorage.removeItem(dataKey);
   }
-
-  useEffect(() => {
-    loadTransactions();
-  }, []);
 
   useFocusEffect(
     useCallback(() => {
