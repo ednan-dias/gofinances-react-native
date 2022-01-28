@@ -79,7 +79,6 @@ function AuthProvider({ children }: AuthProviderProps) {
         await AsyncStorage.setItem(userStorageKey, JSON.stringify(userLogged));
       }
     } catch (error) {
-      console.log("Passou aqui?", error);
       throw new Error(error as string);
     }
   }

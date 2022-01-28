@@ -2,10 +2,10 @@ import fetchMock from "jest-fetch-mock";
 fetchMock.enableMocks();
 
 import { renderHook, act } from "@testing-library/react-hooks";
-import { startAsync } from "expo-auth-session";
 import * as AuthSession from "expo-auth-session";
 
 import { AuthProvider, useAuth } from "./auth";
+import { not } from "react-native-reanimated";
 
 const userTest = {
   id: "any_id",
@@ -16,12 +16,16 @@ const userTest = {
 
 jest.mock("expo-auth-session");
 
+jest.mock("@react-native-async-storage/async-storage", () => ({
+  getItem: jest.fn(),
+  setItem: jest.fn(),
+}));
+
 describe("Auth Hook", () => {
   it("should be able to sign in with Google account existing", async () => {
     fetchMock.mockResponseOnce(JSON.stringify(userTest));
-
-    const googleMocked = jest.mocked(startAsync as any);
-    googleMocked.mockReturnValue({
+    const googleMocked = jest.mocked(AuthSession.startAsync as any);
+    googleMocked.mockReturnValueOnce({
       type: "success",
       params: {
         access_token: "any_token",
@@ -34,13 +38,12 @@ describe("Auth Hook", () => {
 
     await act(() => result.current.signInWithGoogle());
 
-    expect(result.current.user.email).toBe(userTest.email);
+    expect(result.current.user.email).toBe("john.doe@email.com");
   });
 
   it("user should not connect if cancel authentication with Google", async () => {
     fetchMock.mockResponseOnce(JSON.stringify(userTest));
-
-    const googleMocked = jest.mocked(startAsync);
+    const googleMocked = jest.mocked(AuthSession.startAsync);
 
     googleMocked.mockReturnValue({
       type: "cancel",
@@ -55,8 +58,18 @@ describe("Auth Hook", () => {
 
     await act(() => result.current.signInWithGoogle());
 
-    console.log("Tem usuário?", result.current.user);
-
     expect(result.current.user).not.toHaveProperty("id");
+  });
+
+  it("should be error with incorrectly Google parameters", async () => {
+    const { result } = renderHook(() => useAuth(), {
+      wrapper: AuthProvider,
+    });
+
+    try {
+      await act(() => result.current.signInWithGoogle());
+    } catch {
+      expect(result.current.user).toEqual({});
+    }
   });
 });
